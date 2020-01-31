@@ -1,9 +1,62 @@
 import fetch from 'node-fetch';
 import { NonFunctionKeys } from 'utility-types';
-import {
-  FormValidationError, ServerUnreachableError, UnauthorizedError, NotFoundError,
-} from './errors';
-import { Model } from '~/models/Model';
+import { ServerUnreachableError } from './errors';
+import { Model } from '../models/Model';
+
+export enum RelationType {
+  BelongsTo = 'belongsTo',
+  HasMany = 'hasMany',
+}
+
+export type SchemaOf<T extends object> = Pick<T, NonFunctionKeys<T>>;
+
+export enum QueryFilterOrder {
+  Asc = 'asc',
+  Desc = 'desc',
+}
+
+export interface QueryFilter {
+  where?: Record<string, any>;
+  limit?: number;
+  page?: number;
+  sort?: string;
+  order?: QueryFilterOrder;
+}
+
+export function addQueryFilter<T extends Model>(baseUrl: string, filter: QueryFilter): string {
+  baseUrl += '?';
+  if (filter.where) {
+    for (const key in filter.where) {
+      if (filter.where[key] && filter.where.hasOwnProperty(key)) {
+        baseUrl += `${key}=${filter.where[key]}&`;
+      }
+    }
+  }
+  if (filter.limit) baseUrl += `_limit=${filter.limit}&`;
+  if (filter.page) baseUrl += `_page=${filter.page}&`;
+  if (filter.sort) baseUrl += `_sort=${filter.sort}&`;
+  if (filter.order) baseUrl += `_order=${filter.order}&`;
+
+  return encodeURI(baseUrl).slice(0, -1);
+}
+
+/**
+ * Define the configuration of a relation
+ */
+export interface Relation {
+  /** Type of the relation: hasMany, belongsTo, ... */
+  type: RelationType;
+
+  /** The target Model */
+  model: any;
+
+  /**
+   * The key containing the relation link
+   * - on the target model if hasMany
+   * - on the current model if belongsTo
+   */
+  foreignKey: string;
+}
 
 export const enum HttpMethod {
   GET = 'GET',
@@ -12,8 +65,6 @@ export const enum HttpMethod {
   PATCH = 'PATCH',
   DELETE = 'DELETE'
 }
-
-type SchemaOf<T extends object> = Pick<T, NonFunctionKeys<T>>;
 
 export interface ApiResponse<T extends object> {
   data: SchemaOf<T> | any;

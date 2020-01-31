@@ -1,7 +1,7 @@
-import { NonFunctionKeys } from 'utility-types';
 import { Model } from './Model';
+import User from './User';
+import { Relation, RelationType } from '../utils/helpers';
 
-type SchemaOf<T extends object> = Pick<T, NonFunctionKeys<T>>;
 
 interface AlbumSchema {
   userId: number;
@@ -9,24 +9,20 @@ interface AlbumSchema {
 }
 
 class Album extends Model implements AlbumSchema {
-  userId: number;
-
-  title: string;
-
   static config = {
     endpoint: 'albums',
+    relations: {
+      user: {
+        type: RelationType.BelongsTo,
+        model: User,
+        foreignKey: 'userId',
+      },
+    } as Record<string, Relation>,
   };
 
-  constructor(data: SchemaOf<Album>) {
-    super();
-    this.id = data.id;
-    this.userId = data.userId;
-    this.title = data.title;
-  }
+  userId!: number;
 
-  get modelClass(): typeof Model {
-    return this.constructor as typeof Model;
-  }
+  title!: string;
 }
 
 export default Album;

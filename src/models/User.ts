@@ -1,11 +1,11 @@
 import { Model } from './Model';
+import { Relation, RelationType, SchemaOf } from '../utils/helpers';
+import Album from './Album';
 
 class User extends Model {
-  id: number;
+  name!: string;
 
-  name: string;
-
-  username: string;
+  username!: string;
 
   email?: string;
 
@@ -25,14 +25,14 @@ class User extends Model {
 
   protected static config = {
     endpoint: 'users',
+    relations: {
+      user: {
+        type: RelationType.HasMany,
+        model: Album,
+        foreignKey: 'userId',
+      },
+    } as Record<string, Relation>,
   };
-
-  constructor(id: number, name: string, username: string) {
-    super();
-    this.id = id;
-    this.name = name;
-    this.username = username;
-  }
 }
 
 export default User;
