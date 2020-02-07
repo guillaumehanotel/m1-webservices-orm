@@ -47,6 +47,7 @@ module.exports = {
         "consistent-return": 0,
         "no-dupe-class-members": 0,
         "no-prototype-builtins": 0,
+        'import/prefer-default-export': 0,
 
 
         // @todo those should be enabled, disabled for debugging
@@ -54,7 +55,6 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 0,
 
         'max-len': ['warn', 140],
-        'import/prefer-default-export': 0,
         "import/extensions": [
             "error",
             {

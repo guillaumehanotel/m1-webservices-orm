@@ -10,6 +10,10 @@ export enum RelationType {
 
 export type SchemaOf<T extends object> = Pick<T, NonFunctionKeys<T>>;
 
+export interface FindByIdOptions {
+  includes: string[];
+}
+
 export enum QueryFilterOrder {
   Asc = 'asc',
   Desc = 'desc',
@@ -27,7 +31,7 @@ export function addQueryFilter<T extends Model>(baseUrl: string, filter: QueryFi
   baseUrl += '?';
   if (filter.where) {
     for (const key in filter.where) {
-      if (filter.where[key] && filter.where.hasOwnProperty(key)) {
+      if (filter.where.hasOwnProperty(key) && filter.where[key]) {
         baseUrl += `${key}=${filter.where[key]}&`;
       }
     }
@@ -38,6 +42,18 @@ export function addQueryFilter<T extends Model>(baseUrl: string, filter: QueryFi
   if (filter.order) baseUrl += `_order=${filter.order}&`;
 
   return encodeURI(baseUrl).slice(0, -1);
+}
+
+export interface ModelConfig {
+  /**
+   * The endpoint on the remote API, example 'users'
+   */
+  endpoint: string;
+
+  /**
+   * The definition of the relations
+   */
+  relations?: Record<string, Relation>;
 }
 
 /**

@@ -8,18 +8,23 @@ async function run(): Promise<void> {
   // =========================== Albums ======================================
 
   // ---- FIND BY ID -----
-  // const album = await Album.findById<Album>(2);
+  const album = await Album.findById<Album>(2, {
+    includes: ['photos'],
+  });
+
+  console.log(album.photos);
 
   // ---- FIND -----
-  const albums = await Album.find<Album>({
-    where: {
-      userId: 1,
-    },
-    limit: 5,
-    sort: 'id',
-    order: QueryFilterOrder.Desc,
-  });
-  console.log(albums);
+  // const albums = await Album.find<Album>();
+  // const albums = await Album.find<Album>({
+  //   where: {
+  //     userId: 1,
+  //   },
+  //   limit: 5,
+  //   sort: 'id',
+  //   order: QueryFilterOrder.Desc,
+  // });
+  // console.log(albums);
 
   // ---- CREATE -----
   // let album = await Album.create<Album>({
