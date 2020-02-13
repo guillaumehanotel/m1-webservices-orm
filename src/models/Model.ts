@@ -1,6 +1,13 @@
 import { NonFunctionKeys } from 'utility-types';
 import {
-  addQueryFilter, apiRequest, FindByIdOptions, HttpMethod, ModelConfig, QueryFilter, RelationType,
+  addQueryFilter,
+  apiRequest,
+  FindByIdOptions,
+  HttpMethod,
+  ModelConfig,
+  QueryFilter,
+  Relation,
+  RelationType,
 } from '../utils/helpers';
 import { API_BASE_URL } from '../config/env';
 
@@ -33,36 +40,40 @@ export abstract class Model {
   static async findById<T extends Model>(this: ModelClass<T>, id: ModelIdType, options?: FindByIdOptions): Promise<T> {
     const response = await apiRequest<T>(`${API_BASE_URL}/${this.config.endpoint}/${id}`);
     let object: T = new this(response.data);
-    object = await Model.loadIncludes(object, this.config, options);
+    object = await Model.loadRelations(object, this.config, options);
     return object;
   }
 
-  static async loadIncludes<T extends Model>(object: T, config: ModelConfig, options?: FindByIdOptions): Promise<T> {
+  static async loadRelations<T extends Model>(object: T, config: ModelConfig, options?: FindByIdOptions): Promise<T> {
     if (options && options.includes.length && config.relations) {
       const { relations } = config;
       for (const include of options.includes) {
+        // on suppose que le 'include' (le nom de la relation) correspond au nom de la propriété de la classe
         if (config.relations[include]) {
           const relation = relations[include];
-
-          // on suppose que le 'include' (le nom de la relation) correspond au nom de la propriété de la classe
-
-          // on détermine le type de la relation que l'on veut faire
-          type subRelationType = typeof relation.model;
-          // on récupère la propriété de la classe qui accueillera la relation, en castant le nom de la relation en 'clé de T'
-          const subRelation: keyof T = include as keyof T;
-          const foreignKeyName = relation.foreignKey as keyof T; // 'userId'
-
-          if (relation.type === RelationType.HasMany) {
-            const url = `${API_BASE_URL}/${relation.model.config.endpoint}?${foreignKeyName}=${object.id}`;
-            const relationResponse = await apiRequest(url);
-            object[subRelation] = relationResponse.data as subRelationType;
-          } else if (relation.type === RelationType.BelongsTo) {
-            const foreignKeyValue = object[foreignKeyName]; // album.userId = 1
-            const relationResponse = await apiRequest(`${API_BASE_URL}/${relation.model.config.endpoint}/${foreignKeyValue}`);
-            object[subRelation] = relationResponse.data as subRelationType;
-          }
+          object = await Model.loadRelation(object, relation, include);
         }
       }
+    }
+    return object;
+  }
+
+
+  static async loadRelation<T extends Model>(object: T, relation: Relation, include: string): Promise<T> {
+    // on détermine le type de la relation que l'on veut faire
+    type relationType = typeof relation.model;
+    // on récupère la propriété de la classe qui accueillera la relation, en castant le nom de la relation en 'clé de T'
+    const relationProperty: keyof T = include as keyof T;
+    const foreignKeyName = relation.foreignKey as keyof T; // 'userId'
+
+    if (relation.type === RelationType.HasMany) {
+      object[relationProperty] = await relation.model.find({
+        where: {
+          [foreignKeyName]: object.id,
+        },
+      });
+    } else if (relation.type === RelationType.BelongsTo) {
+      object[relationProperty] = await relation.model.findById(object[foreignKeyName]);
     }
     return object;
   }

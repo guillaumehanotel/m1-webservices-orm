@@ -12,7 +12,9 @@ async function run(): Promise<void> {
     includes: ['photos'],
   });
 
-  console.log(album.photos);
+  // album.user.name = 'The Grinch';
+  // await album.user.save();
+  console.log(album);
 
   // ---- FIND -----
   // const albums = await Album.find<Album>();
@@ -69,6 +71,8 @@ async function run(): Promise<void> {
 
   // const users = await User.find<User>();
   // console.log(users);
+
+  // =========================== Photos ======================================
 
   // Photos
   // const photo = await Photo.findById(1);
