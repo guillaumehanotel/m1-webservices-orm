@@ -2,11 +2,11 @@
   "name": "webservices01",
   "version": "1.0.0",
   "description": "",
-  "main": "src/server.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "serve": "json-server --watch db.json",
+    "start": "node --require ts-node/register src/main.ts"
   },
-  "author": "",
+  "author": "Guillaume HANOTEL",
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^13.5.0",
@@ -25,6 +25,7 @@
     "es6-promise": "^4.2.8",
     "express": "^4.17.1",
     "isomorphic-fetch": "^2.2.1",
+    "json-server": "^0.16.1",
     "node-fetch": "^2.6.0",
     "utility-types": "^3.10.0"
   }

@@ -58,7 +58,6 @@ export abstract class Model {
     return object;
   }
 
-
   static async loadRelation<T extends Model>(object: T, relation: Relation, include: string): Promise<T> {
     // on détermine le type de la relation que l'on veut faire
     type relationType = typeof relation.model;
